@@ -1,0 +1,28 @@
+# Intégration continue : à chaque push et pull request, GitHub lance la même vérification
+# que le hook Claude Code (APP/outils/scripts/verifier.sh) : compilation du firmware + tests.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilateur ARM
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi
+
+      - name: SDK Pico 2.2.0
+        run: git clone --depth 1 --branch 2.2.0 --recurse-submodules --shallow-submodules https://github.com/raspberrypi/pico-sdk.git "$HOME/pico-sdk"
+
+      - name: Vérification (firmware + tests)
+        run: PICO_SDK_PATH="$HOME/pico-sdk" ./APP/outils/scripts/verifier.sh </dev/null
+
+      - name: Fichiers .uf2
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: APP/outils/build/*.uf2
