@@ -1,0 +1,32 @@
+# Compilation (fichiers générés dans APP/outils/build/, chemins absolus)
+build/
+*.uf2
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Mesures du test robot (APP/outils/mesures/, fichiers CSV lourds, regénérables)
+mesures/
+
+# Éditeurs et index
+.cache/
+# .vscode : seuls settings.json et c_cpp_properties.json sont partagés (masque les dossiers d'outils dans VS Code)
+.vscode/*
+!.vscode/settings.json
+!.vscode/c_cpp_properties.json
+.idea/
+
+# Système
+.DS_Store
+*.swp
+
+# Claude Code : réglages personnels et worktrees (copies du dépôt sur d'autres branches)
+.claude/settings.local.json
+.claude/worktrees/
