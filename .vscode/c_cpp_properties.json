@@ -1,0 +1,13 @@
+{
+  "configurations": [
+    {
+      "name": "Pico 2 W",
+      "compileCommands": "${workspaceFolder}/APP/outils/build/compile_commands.json",
+      "compilerPath": "${userHome}/.pico-sdk/arm-gnu-toolchain-14.2.rel1-darwin-arm64-arm-none-eabi/bin/arm-none-eabi-gcc",
+      "includePath": ["${workspaceFolder}/APP"],
+      "cStandard": "c11",
+      "intelliSenseMode": "gcc-arm"
+    }
+  ],
+  "version": 4
+}
