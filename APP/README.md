@@ -6,7 +6,7 @@ Boîtier portable (Raspberry Pi Pico 2 W + capteur LSM6DSOX) qui mesure l'activi
 
 Tout le code du Pico est dans ce dossier : `main.c`, `acquisition.c`, `capteur.c`, `bus.c` (+ leurs `.h`).
 Le dossier `outils/` contient la fabrication, les tests et les scripts : pas besoin de l'ouvrir pour lire le code.
-Le dossier `docs/` explique chaque fichier `.c`.
+Chaque fichier `.c` est commenté en français simple, et le dossier `docs/` l'explique.
 
 ## Démarrage rapide
 
