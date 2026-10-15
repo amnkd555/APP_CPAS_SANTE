@@ -61,7 +61,7 @@ bool connect() {
 }
 
 // ----- Requête HTTP : équivalent de requests.get(URL) -----
-const char *serveur = "192.168.1.10";   // adresse IP du serveur
+const char *serveur = "193.48.125.177";   // adresse IP du serveur
 const int   port    = 80;               // port HTTP par défaut
 const char *chemin  = "/temperature.php"; // page PHP dans C:\xampp\htdocs
 const char *nom_parametre = "temperature"; // nom envoyé au serveur : /?temperature=23.45
@@ -150,7 +150,7 @@ int main() {
         float temperature = lire_temperature();
         printf("Temperature: %.2f C\n", temperature);
 
-        // Envoi au serveur : GET http://192.168.1.10/temperature.php?temperature=23.45
+        // Envoi au serveur : GET http://193.48.125.177/temperature.php?temperature=23.45
         char page[100];
         snprintf(page, sizeof(page), "%s?%s=%.2f", chemin, nom_parametre, temperature);
         requests_get(page);
