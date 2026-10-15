@@ -1,34 +1,26 @@
 # acquisition.c
 
-Fait une mesure et l'envoie au Mac. Appelé en boucle par `main.c`.
+Fait une mesure et l'envoie au Mac. `main.c` l'appelle sans arrêt.
 
-## `acquisition_cycle()` (la seule fonction publique)
+## À chaque tour
 
-À chaque tour :
+1. Si le Mac vient de se connecter, envoie l'en-tête : la date du programme, son nom, puis le nom des colonnes.
+2. Si le capteur n'est pas encore prêt, le démarre.
+   - Capteur absent : la LED clignote 5 fois vite, puis on réessaie.
+   - Capteur trouvé : la LED reste allumée.
+3. Lit le capteur.
+   - Lecture réussie : envoie une ligne de chiffres.
+   - Lecture ratée : envoie `# erreur I2C`. Le capteur sera redémarré au tour suivant.
 
-1. Si le Mac vient d'ouvrir le port série, envoie l'en-tête :
-   ```
-   # Anti-Sedentarite - LSM6DSOX (+/-2 g, 104 Hz)
-   timestamp_ms,ax_g,ay_g,az_g,mag_g
-   ```
-2. Si le capteur n'est pas prêt, le démarre.
-3. Lit l'accélération sur x, y, z.
-   - Lecture OK : envoie une ligne CSV, par ex. `15230,0.01234,-0.00512,0.99871,0.99880`.
-   - Lecture ratée : envoie `# erreur I2C` et note que le capteur devra être redémarré au tour suivant.
+## Une ligne de mesure
 
-## Fonctions internes
+Exemple : `3615,0.01049,-0.03483,0.99997,1.00063,0.009,0.219,-0.674`
 
-| Fonction | Rôle |
+| Colonne | Ce que c'est |
 |---|---|
-| `led()` | allume ou éteint la LED |
-| `envoyer_entete_si_ouverture()` | envoie l'en-tête une fois par ouverture du port |
-| `demarrer_capteur()` | tant que le capteur ne répond pas : 5 flashs rapides puis on réessaie. Une fois OK : LED fixe |
-| `envoyer_mesure()` | calcule la norme `mag_g = racine(ax² + ay² + az²)` et écrit la ligne CSV |
+| `timestamp_ms` | temps depuis l'allumage du Pico, en millisecondes |
+| `ax_g`, `ay_g`, `az_g` | accélération sur chaque axe, en g (1 g = la pesanteur) |
+| `mag_g` | accélération totale. Vaut environ 1 quand le capteur ne bouge pas |
+| `gx_dps`, `gy_dps`, `gz_dps` | vitesse de rotation autour de chaque axe, en degrés par seconde. Vaut environ 0 quand le capteur ne bouge pas |
 
-## Colonnes du CSV
-
-| Colonne | Contenu |
-|---|---|
-| `timestamp_ms` | temps depuis l'allumage du Pico, en ms |
-| `ax_g`, `ay_g`, `az_g` | accélération par axe, en g (1 g = gravité) |
-| `mag_g` | norme de l'accélération. Vaut environ 1 si le capteur est immobile |
+Les lignes qui commencent par `#` sont des messages, pas des mesures.
