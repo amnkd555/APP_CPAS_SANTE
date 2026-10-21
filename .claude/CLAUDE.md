@@ -19,7 +19,7 @@ LED fixe = capteur OK, 5 flashs rapides = capteur absent. Erreur I2C → `# erre
 - **`CPAS/`** = réservé aux autres étudiants (vide, `.gitkeep`). Ne pas y toucher sans demande.
 - **Dans `APP/`, le code et rien d'autre** : `.c`/`.h`, `README.md`, `outils/`, `docs/`.
 - **`docs/`** : un `nom.md` par `nom.c`, en français simple, sans terme technique inutile ni blabla. Modifier un `.c` -> mettre à jour son `.md` et ses commentaires.
-- **`APP/outils/` = tout le reste** (CMake, tests, scripts, build, mesures), lui aussi masqué dans VS Code. Tout nouvel outil y va, jamais à la racine de `APP/`.
+- **`APP/outils/` = tout le reste** (CMake, tests, scripts, build), lui aussi masqué dans VS Code. Tout nouvel outil y va, jamais à la racine de `APP/`.
 - Ne peuvent pas quitter la racine du dépôt (sinon ils cessent de fonctionner), donc **masqués** dans VS Code
   par `.vscode/settings.json` (`files.exclude`, fichier commité) : `.claude/`, `.github/`, `.vscode/`,
   `.editorconfig`, `.clangd`, `.cache/`. Ces consignes sont dans `.claude/CLAUDE.md`.
@@ -60,8 +60,21 @@ Sinon : BOOTSEL + glisser `APP/outils/build/mesure_capteur.uf2` sur le lecteur R
 - LED : uniquement via CYW43 (`pico_cyw43_arch_none`), pas de prise en charge de GP25.
 - **Aucun emoji** dans le dépôt (code, README, commits) : texte uniquement (`OK`, `[ ]`, `**Attention :**`).
 - Git (règles complètes : skill `git`, `.claude/skills/git/SKILL.md`) :
+  - **On ne travaille JAMAIS sur `main`.** On travaille sur une branche `feature/<nom>` (ou `fix/<nom>`…)
+    créée depuis `develop`, puis on la fusionne dans `develop`. `main` ne reçoit que `develop`, quand c'est stable.
   - Branches : `main` (stable) ← `develop` (intégration) ← `feature/<nom>`, `fix/<nom>`… créées depuis `develop`.
   - **Aucun commit sur `main` ni `develop`** : seulement sur les branches de travail.
+  - **Messages de commit et titres de PR en français**, au format Conventional Commits : `type(portée): description`,
+    verbe au présent (`ajoute`, `corrige`), minuscule, sans accents, sans point final, ≤ 72 caractères.
+    Ex. : `feat(capteur): ajoute la lecture du gyroscope`. Détail du pourquoi, si utile, après une ligne vide.
+  - **Guider l'utilisateur à chaque étape** (débutant en Git) :
+    1. Avant de modifier : vérifier la branche (`git branch --show-current`). Sur `main` ou `develop` →
+       proposer `git switch develop && git pull && git switch -c feature/<nom>` avant toute modification.
+    2. Après chaque changement logique qui compile : proposer le commit (fichiers à ajouter, message en anglais,
+       type expliqué en une phrase) et attendre l'accord avant de commiter.
+    3. Sujet terminé : proposer `git push -u origin <branche>` puis une PR **vers `develop`** (`gh pr create --base develop`).
+    4. Après le merge : revenir sur `develop`, `git pull`, supprimer la branche locale.
+    5. Signaler les branches en retard (`develop` local derrière `origin/develop`, branche jamais poussée).
   - **Merge vers `main` uniquement depuis `develop`** ; **merge vers `develop` uniquement depuis
     `feature/`, `fix/`, `hotfix/`, `chore/`, `docs/`, `refactor/`, `test/`**.
   - **4 fichiers max par commit**, un seul changement logique.
