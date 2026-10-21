@@ -5,6 +5,6 @@
 
 bool capteur_demarrer(void);
 
-bool capteur_lire(float acceleration_g[3]);
+bool capteur_lire(float acceleration_g[3], float rotation_dps[3]);
 
 #endif
