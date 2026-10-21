@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Capture et analyse des mesures du test de perturbations du LSM6DSOX (robot UR3).
 
-Capture (enregistre le flux CSV du Pico pendant N secondes) :
-    python3 scripts/perturbations.py capture d050_on_r1 --duree 30
+Capture (enregistre le flux CSV du Pico pendant N secondes dans APP/test/) :
+    python3 APP/outils/scripts/perturbations.py capture d050_on_r1 --duree 30
+Le script demande un commentaire, écrit en première ligne du fichier.
 
 Analyse (compare robot hors tension / sous tension à chaque distance) :
     python3 scripts/perturbations.py analyse
@@ -22,8 +23,9 @@ import termios
 import time
 import tty
 
-DOSSIER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "mesures")
+DOSSIER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "test")
 AXES = ["ax_g", "ay_g", "az_g", "mag_g"]
+ENTETE = AXES + ["gx_dps", "gy_dps", "gz_dps"]
 MOTIF = re.compile(r"d(\d+)_(off|on)_r(\d+)\.csv$")
 
 
@@ -34,11 +36,13 @@ def trouver_port():
     return ports[0]
 
 
-def capture(etiquette, duree, port):
+def capture(etiquette, duree, port, commentaire):
     os.makedirs(DOSSIER, exist_ok=True)
     chemin = os.path.join(DOSSIER, etiquette + ".csv")
     if os.path.exists(chemin):
         sys.exit(f"{chemin} existe déjà : choisir une autre étiquette.")
+    if commentaire is None:
+        commentaire = input("Commentaire (a quel test correspond ce fichier) : ")
 
     fd = os.open(port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
     tty.setraw(fd)
@@ -64,10 +68,10 @@ def capture(etiquette, duree, port):
     os.close(fd)
 
     with open(chemin, "w") as f:
-        f.write("timestamp_ms," + ",".join(AXES) + "\n")
+        f.write(f"# {commentaire}. {duree:g} s, {time.strftime('%Y-%m-%d %H:%M')}\n")
+        f.write(f"# erreurs I2C : {erreurs}\n")
+        f.write("timestamp_ms," + ",".join(ENTETE) + "\n")
         f.write("\n".join(lignes) + "\n")
-    with open(chemin + ".erreurs", "w") as f:
-        f.write(f"{erreurs}\n")
 
     donnees = lire_csv(chemin)
     duree_reelle = (donnees["t"][-1] - donnees["t"][0]) / 1000 if len(donnees["t"]) > 1 else 0
@@ -80,23 +84,22 @@ def capture(etiquette, duree, port):
 def lire_csv(chemin):
     donnees = {"t": [], **{axe: [] for axe in AXES}}
     with open(chemin) as f:
-        next(f)
         for ligne in f:
             champs = ligne.strip().split(",")
-            if len(champs) != 5:
+            if len(champs) < 5 or not ligne[0].isdigit():
                 continue
             donnees["t"].append(int(champs[0]))
-            for axe, valeur in zip(AXES, champs[1:]):
+            for axe, valeur in zip(AXES, champs[1:5]):
                 donnees[axe].append(float(valeur))
     return donnees
 
 
 def lire_erreurs(chemin):
-    try:
-        with open(chemin + ".erreurs") as f:
-            return int(f.read().strip())
-    except (OSError, ValueError):
-        return 0
+    with open(chemin) as f:
+        for ligne in f:
+            if ligne.startswith("# erreurs I2C :"):
+                return int(ligne.split(":")[1])
+    return 0
 
 
 def analyse(seuil):
@@ -114,7 +117,7 @@ def analyse(seuil):
 
     distances = sorted({d for d, _ in sigma if (d, "off") in sigma and (d, "on") in sigma})
     if not distances:
-        sys.exit("Aucune paire off/on trouvée dans mesures/.")
+        sys.exit("Aucune paire off/on trouvée dans APP/test/.")
 
     print(f"Critère : R = max sur x, y, z de sigma_on / sigma_off <= {seuil}, et 0 erreur I2C\n")
     print(f"{'d (mm)':>7} | {'sx off':>7} {'sx on':>7} | {'sy off':>7} {'sy on':>7} | "
@@ -149,12 +152,13 @@ def main():
     p_cap.add_argument("etiquette", help="ex. d050_on_r1")
     p_cap.add_argument("--duree", type=float, default=30)
     p_cap.add_argument("--port", default=None)
+    p_cap.add_argument("--commentaire", default=None, help="sinon, le script le demande")
     p_ana = sous.add_parser("analyse")
     p_ana.add_argument("--seuil", type=float, default=1.10)
     args = parser.parse_args()
 
     if args.commande == "capture":
-        capture(args.etiquette, args.duree, args.port or trouver_port())
+        capture(args.etiquette, args.duree, args.port or trouver_port(), args.commentaire)
     else:
         analyse(args.seuil)
 
