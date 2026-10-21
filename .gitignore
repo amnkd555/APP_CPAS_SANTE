@@ -12,9 +12,6 @@ __pycache__/
 *.pyc
 .venv/
 
-# Mesures du test robot (APP/outils/mesures/, fichiers CSV lourds, regénérables)
-mesures/
-
 # Éditeurs et index
 .cache/
 # .vscode : seuls settings.json et c_cpp_properties.json sont partagés (masque les dossiers d'outils dans VS Code)
