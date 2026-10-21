@@ -10,5 +10,9 @@
     ".editorconfig": true,
     "APP/outils": true
   },
-  "clangd.arguments": ["--compile-commands-dir=APP/outils/build"]
+  "clangd.arguments": [
+    "--compile-commands-dir=APP/outils/build"
+  ],
+  "git.autofetch": true,
+  "cmake.sourceDirectory": "${workspaceFolder}/APP/outils"
 }

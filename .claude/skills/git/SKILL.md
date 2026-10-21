@@ -5,6 +5,8 @@ description: Règles Git du projet — branches main/develop/feature/fix, worktr
 
 # Git — règles du projet
 
+**On ne travaille jamais sur `main`.** Tout se fait sur une branche `feature/<nom>` (ou `fix/<nom>`…) créée depuis `develop`.
+
 ## Les branches
 
 ```
@@ -37,17 +39,17 @@ git worktree remove .claude/worktrees/carte-sd                            # supp
 
 ## Commit
 
-Format : `<type>(<portee>): <description>` — portée facultative, description à l'impératif, minuscule, sans point final, ≤ 72 caractères.
+Format (Conventional Commits) : `<type>(<portee>): <description>` — portée facultative, description **en français**, verbe au présent (`ajoute`, `corrige`), minuscule, sans accents, sans point final, ≤ 72 caractères. Détail du pourquoi, si utile, dans le corps après une ligne vide. Même format pour le titre des PR.
 
 | Type | Usage | Exemple |
 |---|---|---|
 | `feat` | Nouvelle fonctionnalité | `feat(capteur): ajoute la lecture du gyroscope` |
-| `fix` | Correction de bug | `fix(bus): corrige le délai I2C` |
+| `fix` | Correction de bug | `fix(bus): corrige le delai I2C` |
 | `docs` | README, docs/, consignes | `docs: complete le README` |
-| `refactor` | Réorganisation du code | `refactor(acquisition): découpe la boucle` |
+| `refactor` | Réorganisation du code | `refactor(acquisition): decoupe la boucle` |
 | `test` | Tests | `test(capteur): teste l'erreur I2C` |
-| `chore` | Outils, config, ménage | `chore: met à jour le hook git` |
-| `ci` | GitHub Actions | `ci: compile le firmware à chaque push` |
+| `chore` | Outils, config, ménage | `chore: met a jour le hook git` |
+| `ci` | GitHub Actions | `ci: compile le firmware a chaque push` |
 | `build` | CMake, toolchain | `build: passe au SDK 2.2.0` |
 
 Portées : `bus`, `capteur`, `acquisition`, `outils`.

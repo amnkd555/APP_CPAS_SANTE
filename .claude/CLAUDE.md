@@ -18,8 +18,8 @@ LED fixe = capteur OK, 5 flashs rapides = capteur absent. Erreur I2C → `# erre
 - **`APP/`** = notre projet (tout le code ci-dessous). Les chemins de ce fichier sont relatifs à `APP/` sauf mention contraire.
 - **`CPAS/`** = réservé aux autres étudiants (vide, `.gitkeep`). Ne pas y toucher sans demande.
 - **Dans `APP/`, le code et rien d'autre** : `.c`/`.h`, `README.md`, `outils/`, `docs/`.
-- **`docs/`** (recréé à la demande de l'utilisateur le 2026-10-05) : un `nom.md` par `nom.c`, explication simple et courte du code. Modifier un `.c` → mettre à jour son `.md`.
-- **`APP/outils/` = tout le reste** (CMake, tests, scripts, build, mesures), lui aussi masqué dans VS Code. Tout nouvel outil y va, jamais à la racine de `APP/`.
+- **`docs/`** : un `nom.md` par `nom.c`, en français simple, sans terme technique inutile ni blabla. Modifier un `.c` -> mettre à jour son `.md` et ses commentaires.
+- **`APP/outils/` = tout le reste** (CMake, tests, scripts, build), lui aussi masqué dans VS Code. Tout nouvel outil y va, jamais à la racine de `APP/`.
 - Ne peuvent pas quitter la racine du dépôt (sinon ils cessent de fonctionner), donc **masqués** dans VS Code
   par `.vscode/settings.json` (`files.exclude`, fichier commité) : `.claude/`, `.github/`, `.vscode/`,
   `.editorconfig`, `.clangd`, `.cache/`. Ces consignes sont dans `.claude/CLAUDE.md`.
@@ -35,7 +35,7 @@ LED fixe = capteur OK, 5 flashs rapides = capteur absent. Erreur I2C → `# erre
 | `outils/tests/bus_simule.c` | faux bus (256 registres) qui remplace `bus.c` dans les tests |
 | `.clangd`, `.vscode/c_cpp_properties.json` | indiquent à clangd et à l'extension C/C++ de VS Code `outils/build/compile_commands.json` (sinon : « impossible d'ouvrir pico/... ») |
 
-- `outils/scripts/perturbations.py` : `capture <d###_on|off_r#> --duree 30` (écrit `outils/mesures/`), `analyse --seuil 1.10`.
+- `outils/scripts/perturbations.py` : `capture <d###_on|off_r#> --duree 30` (écrit `APP/test/`, dossier visible ; demande un commentaire mis en 1re ligne `#`, 2e ligne `# erreurs I2C : N`), `analyse --seuil 1.10`.
 - `outils/scripts/verifier.sh` : voir « Tests automatiques ».
 - `outils/CMakeLists.txt` (seul fichier CMake) : `PICO_BOARD` par défaut `pico2_w`, puis `add_executable(mesure_capteur ${CODE}/…)` (stdio USB). **Nouveau `.c` → l'ajouter à `add_executable`.**
 - `outils/cmake/pico_sdk_import.cmake` : copie officielle du SDK (ne pas modifier).
@@ -56,12 +56,25 @@ Flash sans BOOTSEL (le firmware en cours doit avoir stdio USB) : `picotool load 
 Sinon : BOOTSEL + glisser `APP/outils/build/mesure_capteur.uf2` sur le lecteur RP2350.
 
 ## Conventions
-- **Aucun commentaire** dans les `.c`/`.h` de la racine (code nu, choix de l'utilisateur) : les explications se donnent dans la conversation. Pas d'accents dans les chaînes `printf`.
+- **Commentaires** dans les `.c` : courts, en français simple (exception voulue par l'utilisateur, 2026-10-15). Explications aussi dans `docs/`. Modifier un `.c` → mettre à jour ses commentaires. Pas d'accents dans les chaînes `printf`.
 - LED : uniquement via CYW43 (`pico_cyw43_arch_none`), pas de prise en charge de GP25.
 - **Aucun emoji** dans le dépôt (code, README, commits) : texte uniquement (`OK`, `[ ]`, `**Attention :**`).
 - Git (règles complètes : skill `git`, `.claude/skills/git/SKILL.md`) :
+  - **On ne travaille JAMAIS sur `main`.** On travaille sur une branche `feature/<nom>` (ou `fix/<nom>`…)
+    créée depuis `develop`, puis on la fusionne dans `develop`. `main` ne reçoit que `develop`, quand c'est stable.
   - Branches : `main` (stable) ← `develop` (intégration) ← `feature/<nom>`, `fix/<nom>`… créées depuis `develop`.
   - **Aucun commit sur `main` ni `develop`** : seulement sur les branches de travail.
+  - **Messages de commit et titres de PR en français**, au format Conventional Commits : `type(portée): description`,
+    verbe au présent (`ajoute`, `corrige`), minuscule, sans accents, sans point final, ≤ 72 caractères.
+    Ex. : `feat(capteur): ajoute la lecture du gyroscope`. Détail du pourquoi, si utile, après une ligne vide.
+  - **Guider l'utilisateur à chaque étape** (débutant en Git) :
+    1. Avant de modifier : vérifier la branche (`git branch --show-current`). Sur `main` ou `develop` →
+       proposer `git switch develop && git pull && git switch -c feature/<nom>` avant toute modification.
+    2. Après chaque changement logique qui compile : proposer le commit (fichiers à ajouter, message en anglais,
+       type expliqué en une phrase) et attendre l'accord avant de commiter.
+    3. Sujet terminé : proposer `git push -u origin <branche>` puis une PR **vers `develop`** (`gh pr create --base develop`).
+    4. Après le merge : revenir sur `develop`, `git pull`, supprimer la branche locale.
+    5. Signaler les branches en retard (`develop` local derrière `origin/develop`, branche jamais poussée).
   - **Merge vers `main` uniquement depuis `develop`** ; **merge vers `develop` uniquement depuis
     `feature/`, `fix/`, `hotfix/`, `chore/`, `docs/`, `refactor/`, `test/`**.
   - **4 fichiers max par commit**, un seul changement logique.

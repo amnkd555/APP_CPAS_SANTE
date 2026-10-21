@@ -1,24 +1,17 @@
 # bus.c
 
-Gère le bus I2C0 : les deux fils qui relient le Pico au capteur.
+Gère les deux fils qui relient le Pico au capteur et à l'horloge :
+- GP4 : les données ;
+- GP5 : le rythme des échanges.
 
-- SDA (données) : GP4
-- SCL (horloge) : GP5
-- Vitesse : 400 kHz
+Vitesse : 100 000 bits par seconde. C'est lent, mais plus fiable, et largement suffisant.
 
-## `bus_demarrer()`
+## Les trois fonctions
 
-Allume l'I2C0 et branche GP4/GP5 dessus.
+| Fonction | Ce qu'elle fait |
+|---|---|
+| `bus_demarrer()` | prépare les deux fils |
+| `bus_ecrire()` | écrit un réglage dans un composant |
+| `bus_lire()` | lit une ou plusieurs valeurs dans un composant |
 
-## `bus_ecrire(adresse, registre, valeur)`
-
-Envoie 2 octets au composant : le numéro du registre, puis la valeur à y écrire.
-
-## `bus_lire(adresse, registre, destination, n)`
-
-1. Envoie le numéro du registre à lire.
-2. Lit `n` octets et les range dans `destination`.
-
-## Délai maximum
-
-Chaque échange est limité à 2 ms (`DELAI_MAX_US`). Si le capteur ne répond pas, la fonction renvoie `false` au lieu de bloquer le programme.
+Chaque échange dure au plus 2 ms. Si le composant ne répond pas, la fonction renvoie `false` au lieu de bloquer le programme.
