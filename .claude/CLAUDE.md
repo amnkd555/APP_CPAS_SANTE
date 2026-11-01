@@ -14,9 +14,10 @@ CSV `timestamp_ms,ax_g,ay_g,az_g,mag_g` sur USB. Lignes `#` = commentaires/erreu
 LED fixe = capteur OK, 5 flashs rapides = capteur absent. Erreur I2C → `# erreur I2C`, capteur redémarré au tour suivant.
 
 **Organisation du dépôt** (dépôt GitHub `APP_CPAS_SANTE`, but : la personne qui lit le code ne voit que le code) :
-- **Racine** : deux dossiers de projet, `APP/` et `CPAS/`, plus `README.md`, `.gitignore` et la config masquée.
+- **Racine** : trois dossiers de projet, `APP/`, `CPAS/` et `EdgeAI/`, plus `README.md`, `.gitignore` et la config masquée.
 - **`APP/`** = notre projet (tout le code ci-dessous). Les chemins de ce fichier sont relatifs à `APP/` sauf mention contraire.
 - **`CPAS/`** = réservé aux autres étudiants (vide, `.gitkeep`). Ne pas y toucher sans demande.
+- **`EdgeAI/`** = projet d'apprentissage de l'utilisatrice (IA embarquée + IoT), hors consignes scolaires ; mêmes règles de code qu'`APP/`.
 - **Dans `APP/`, le code et rien d'autre** : `.c`/`.h`, `README.md`, `outils/`, `docs/`.
 - **`docs/`** : un `nom.md` par `nom.c`, en français simple, sans terme technique inutile ni blabla. Modifier un `.c` -> mettre à jour son `.md` et ses commentaires.
 - **`APP/outils/` = tout le reste** (CMake, tests, scripts, build), lui aussi masqué dans VS Code. Tout nouvel outil y va, jamais à la racine de `APP/`.
