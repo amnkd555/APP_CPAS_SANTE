@@ -6,6 +6,7 @@ Dépôt commun des projets santé.
 |---|---|
 | `APP/` | APP : dispositif anti-sédentarité (Raspberry Pi Pico 2 W + LSM6DSOX) |
 | `CPAS/` | CPAS : projet des autres étudiants |
+| `EdgeAI/` | apprentissage : IA embarquée et IoT sur le boîtier d'APP |
 
 ## Travailler en équipe
 
