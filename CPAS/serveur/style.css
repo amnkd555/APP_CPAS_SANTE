@@ -1,0 +1,10 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0 auto;
+  padding: 16px;
+  max-width: 1000px;
+}
+table { border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 4px 10px; text-align: right; }
+th { background: #f0efec; }
+.graphique { position: relative; height: 280px; }
