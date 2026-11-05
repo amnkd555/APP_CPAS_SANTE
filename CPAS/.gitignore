@@ -1,0 +1,7 @@
+# Contient le mot de passe Wi-Fi : chacun garde le sien (modele : pico/config_exemple.h)
+pico/config.h
+
+# Compilation (normalement dans ~/build-cpas, hors du depot)
+build/
+*.uf2
+*.elf
