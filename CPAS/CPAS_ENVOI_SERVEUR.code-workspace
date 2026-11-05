@@ -1,0 +1,11 @@
+{
+  "folders": [
+    { "path": "." }
+  ],
+  "settings": {
+    "C_Cpp.default.compileCommands": "${env:HOME}/build-cpas/compile_commands.json",
+    "files.associations": { "*.h": "c" },
+    "files.eol": "\n",
+    "editor.tabSize": 4
+  }
+}
