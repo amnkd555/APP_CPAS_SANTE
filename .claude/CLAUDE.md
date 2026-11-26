@@ -36,7 +36,8 @@ LED fixe = capteur OK, 5 flashs rapides = capteur absent. Erreur I2C → `# erre
 | `outils/tests/bus_simule.c` | faux bus (256 registres) qui remplace `bus.c` dans les tests |
 | `.clangd`, `.vscode/c_cpp_properties.json` | indiquent à clangd et à l'extension C/C++ de VS Code `outils/build/compile_commands.json` (sinon : « impossible d'ouvrir pico/... ») |
 
-- `outils/scripts/perturbations.py` : `capture <d###_on|off_r#> --duree 30` (écrit `APP/test/`, dossier visible ; demande un commentaire mis en 1re ligne `#`, 2e ligne `# erreurs I2C : N`), `analyse --seuil 1.10`.
+- `outils/scripts/perturbations.py` : `capture <d###_on|off_r#> --duree 30` (écrit `APP/test/`, dossier visible ; demande un commentaire mis en 1re ligne `#`, puis une ligne `# moyenne <axe> ..., ecart-type ...` par axe), `analyse --seuil 1.10`.
+- `outils/scripts/direct.py [--fenetre 5]` : affiche chaque seconde l'écart-type x, y, z (mg) en direct, n'enregistre rien.
 - `outils/scripts/verifier.sh` : voir « Tests automatiques ».
 - `outils/CMakeLists.txt` (seul fichier CMake) : `PICO_BOARD` par défaut `pico2_w`, puis `add_executable(mesure_capteur ${CODE}/…)` (stdio USB). **Nouveau `.c` → l'ajouter à `add_executable`.**
 - `outils/cmake/pico_sdk_import.cmake` : copie officielle du SDK (ne pas modifier).
