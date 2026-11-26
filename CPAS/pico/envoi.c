@@ -11,7 +11,7 @@
 #include "http_post.h"
 #include "envoi.h"
 
-static char paquet[LIGNES_PAR_PAQUET * 100 + 200];   // le texte du paquet en cours
+static char paquet[LIGNES_PAR_PAQUET * 200 + 400];   // le texte du paquet en cours (200 caracteres max par ligne)
 static int taille;                    // nombre de caracteres dans le paquet
 static int lignes;                    // nombre de mesures dans le paquet
 static bool garder[20];               // garder[i] = true : la colonne i du CSV est envoyee
@@ -83,6 +83,10 @@ static const char *trouver(const char *nom)
     return NULL;
 }
 
+// Les lignes de titres commencent par une lettre, les mesures par un chiffre ou un signe -
+static bool est_lettre(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+static bool est_nombre(char c) { return (c >= '0' && c <= '9') || c == '-'; }
+
 void envoyer_csv(const char *nom)
 {
     const char *csv = trouver(nom);
@@ -92,20 +96,21 @@ void envoyer_csv(const char *nom)
     }
     printf("Envoi de %s\n", nom);
     snprintf(chemin, sizeof chemin, "%s?envoi=%lu", SERVEUR_CHEMIN, (unsigned long)get_rand_32());
-    titres = NULL;                       // on cherchera la ligne de titres de ce CSV
+    titres = NULL;                       // on cherchera la ligne de titres de ce fichier
+    lignes = 0;
     const char *ligne = csv;
 
     while (*ligne != '\0') {
         const char *fin = strchr(ligne, '\n');
-        if (ligne[0] >= 'a' && ligne[0] <= 'z' && titres == NULL) {   // la ligne de titres
+        if (titres == NULL && est_lettre(ligne[0])) {          // la ligne de titres
             titres = ligne;
             choisir_colonnes(ligne);
             nouveau_paquet();
-        } else if (ligne[0] >= '0' && ligne[0] <= '9') {              // une mesure
+        } else if (titres != NULL && est_nombre(ligne[0])) {   // une mesure
             ajouter(ligne);
             lignes++;
         }
-        if (lignes == LIGNES_PAR_PAQUET) {                             // paquet plein : on l'envoie
+        if (lignes == LIGNES_PAR_PAQUET) {                     // paquet plein : on l'envoie
             http_post(chemin, paquet, taille);
             printf("Paquet envoye\n");
             nouveau_paquet();
@@ -113,7 +118,9 @@ void envoyer_csv(const char *nom)
         ligne = fin + 1;
     }
 
-    if (lignes > 0) {                                                  // le dernier paquet
+    if (titres == NULL) {
+        printf("Pas de ligne de titres dans %s : rien envoye\n", nom);
+    } else if (lignes > 0) {                                   // le dernier paquet
         http_post(chemin, paquet, taille);
         printf("Paquet envoye\n");
     }
