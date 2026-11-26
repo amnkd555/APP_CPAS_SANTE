@@ -35,11 +35,11 @@ static err_t quand_recu(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t er
     return ERR_OK;
 }
 
-void http_post(const char *texte, int taille)
+void http_post(const char *chemin, const char *texte, int taille)
 {
     snprintf(entete, sizeof entete,
              "POST %s HTTP/1.0\r\nHost: %s\r\nContent-Type: text/csv\r\nContent-Length: %d\r\n\r\n",
-             SERVEUR_CHEMIN, SERVEUR_IP, taille);
+             chemin, SERVEUR_IP, taille);
     corps = texte;
     taille_corps = taille;
     termine = false;

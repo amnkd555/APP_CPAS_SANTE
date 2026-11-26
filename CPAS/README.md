@@ -1,11 +1,23 @@
-# CPAS - envoi des mesures du Pico vers le serveur XAMPP (version simple)
+# CPAS - envoi des mesures du Pico vers le serveur XAMPP
 
-Le Pico 2 W envoie un fichier de mesures (accelerometre + gyroscope) a un serveur XAMPP.
-Le serveur les range dans MySQL et les affiche sur une page web avec des graphiques.
+Le Pico 2 W envoie les colonnes choisies d'un fichier de mesures a un serveur XAMPP.
+Le serveur les range dans un fichier CSV (un fichier par envoi) et les affiche
+sur une page web avec un graphique par colonne.
 
 ```
-CSV -> firmware du Pico (C) -> Wi-Fi -> Apache/PHP -> MySQL -> page HTML
+CSV -> Pico (colonnes choisies) -> Wi-Fi -> reception.php -> data/<date>_envoi<n>.csv
+                                                         -> table MySQL envois (liste des fichiers)
 ```
+
+## Choisir les mesures envoyees
+
+Dans `pico/config.h` :
+```
+#define COLONNES "timestamp_ms,ax_g,mag_g"
+```
+Noms separes par des virgules, sans espace. Le Pico envoie ces colonnes dans l'ordre du CSV.
+Le serveur s'adapte tout seul : il recoit les noms des colonnes en tete de chaque paquet.
+Si `timestamp_ms` est envoye, il sert d'axe du temps pour les graphiques.
 
 Explication avec schemas : `docs/CPAS_Fonctionnement_Simple.pdf`.
 
@@ -17,24 +29,24 @@ Si quelque chose ne marche pas (Wi-Fi, serveur arrete, mauvaise IP), le Pico ne 
 | Fichier | Role |
 |---|---|
 | `pico/main.c` | connexion Wi-Fi, appel de `envoyer_csv()`, LED allumee a la fin |
-| `pico/envoi.c` | parcourt le CSV et l'envoie par paquets de 50 lignes |
+| `pico/envoi.c` | garde les colonnes choisies et envoie le CSV par paquets de 50 lignes |
 | `pico/http_post.c` | requete HTTP POST avec l'API TCP de lwIP |
 | `pico/donnees/` | le CSV integre au firmware a la compilation (`csv_vers_c.cmake`) |
-| `pico/config.h` | SSID, mot de passe Wi-Fi, IP du PC (modele : `config_exemple.h`) |
+| `pico/config.h` | SSID, mot de passe Wi-Fi, IP du PC, colonnes a envoyer (modele : `config_exemple.h`) |
 | `serveur/` | a copier dans `C:\xampp\htdocs\cpas\` |
-| `serveur/creer_base.sql` | base `cpas_sante`, table `mesures` (a importer dans phpMyAdmin) |
-| `serveur/reception.php` | recoit un paquet en POST et l'insere dans la base |
-| `serveur/index.php` | graphiques Chart.js et 20 dernieres mesures |
+| `serveur/creer_base.sql` | base `cpas_sante`, table `envois` = liste des fichiers (a importer dans phpMyAdmin) |
+| `serveur/reception.php` | recoit un paquet et l'ajoute au fichier CSV de l'envoi (`data/`) |
+| `serveur/index.php` | choix de l'envoi, un graphique par colonne, 20 dernieres mesures, lien vers le CSV |
 
 ## Demarrage rapide
 
 1. `pico/config.h` : mettre le mot de passe Wi-Fi et l'IP du PC.
 2. Compiler (sous WSL) : `./pico/compiler.sh` -> `~/build-cpas/cpas_envoi.uf2`.
 3. Serveur : demarrer Apache et MySQL dans XAMPP, importer `serveur/creer_base.sql`
-   (la table repart vide), copier `serveur/` dans `C:\xampp\htdocs\cpas\`.
+   (n'efface rien), copier le contenu de `serveur/` dans `C:\xampp\htdocs\cpas\`.
 4. Tester le serveur sans le Pico (PowerShell, dans `docs/`) :
    ```
-   curl.exe --data-binary "@paquet_test.csv" "http://localhost/cpas/reception.php"
+   curl.exe --data-binary "@paquet_test.csv" "http://localhost/cpas/reception.php?envoi=1"
    ```
    puis ouvrir `http://localhost/cpas/`.
 5. Flasher : BOOTSEL + brancher, glisser `cpas_envoi.uf2` sur le lecteur `RP2350`.
@@ -42,12 +54,15 @@ Si quelque chose ne marche pas (Wi-Fi, serveur arrete, mauvaise IP), le Pico ne 
 ## Format envoye par le Pico
 
 ```
-POST /cpas/reception.php HTTP/1.0
+POST /cpas/reception.php?envoi=3735928559 HTTP/1.0
 Content-Type: text/csv
 
-61317,0.00744,-0.05862,1.00485,1.00659,-0.140,0.184,-0.604
-61327,0.00640,-0.05685,1.00363,1.00526,-0.123,0.192,-0.674
+timestamp_ms,ax_g,mag_g
+61317,0.00744,1.00659
+61327,0.00640,1.00526
 ...
 ```
 
-Reponse : `OK`.
+Chaque paquet commence par la ligne des noms de colonnes, puis 50 mesures.
+Le numero d'envoi est tire au hasard au demarrage du Pico : tous les paquets
+d'un meme demarrage vont dans le meme fichier. Reponse : `OK`.

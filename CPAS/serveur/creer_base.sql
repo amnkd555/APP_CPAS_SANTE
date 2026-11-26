@@ -1,18 +1,15 @@
--- Base de donnees des mesures du Pico. A importer dans phpMyAdmin (onglet Importer).
--- Attention : la table mesures est effacee puis recreee (elle repart vide).
+-- Base de donnees du projet. A importer une fois dans phpMyAdmin (onglet Importer).
+-- La table envois est la liste des fichiers CSV recus (les mesures sont dans les fichiers).
+-- Rien n'est efface : on peut l'importer meme si la base existe deja.
 
 CREATE DATABASE IF NOT EXISTS cpas_sante;
 USE cpas_sante;
 
-DROP TABLE IF EXISTS mesures;
-CREATE TABLE mesures (
-    id           INT AUTO_INCREMENT PRIMARY KEY,   -- numero de la ligne
-    timestamp_ms INT,      -- temps depuis l'allumage du Pico (ms)
-    ax_g         DOUBLE,   -- acceleration sur x (g)
-    ay_g         DOUBLE,
-    az_g         DOUBLE,
-    mag_g        DOUBLE,   -- acceleration totale (g)
-    gx_dps       DOUBLE,   -- vitesse de rotation sur x (degres par seconde)
-    gy_dps       DOUBLE,
-    gz_dps       DOUBLE
+CREATE TABLE IF NOT EXISTS envois (
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    numero    BIGINT,                               -- numero d'envoi tire au hasard par le Pico
+    fichier   VARCHAR(255),                         -- ex. data/2026-11-26_08-40-12_envoi3735928559.csv
+    colonnes  VARCHAR(255),                         -- ex. timestamp_ms,ax_g,mag_g
+    nb_lignes INT,                                  -- nombre de mesures dans le fichier
+    recu_le   DATETIME DEFAULT CURRENT_TIMESTAMP    -- date du premier paquet
 );
