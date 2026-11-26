@@ -50,7 +50,7 @@ def capture(etiquette, duree, port, commentaire):
     attrs[4] = attrs[5] = termios.B115200
     termios.tcsetattr(fd, termios.TCSANOW, attrs)
 
-    lignes, erreurs, tampon = [], 0, b""
+    lignes, tampon = [], b""
     print(f"Capture {duree} s sur {port} -> {chemin}")
     fin = time.time() + duree
     while time.time() < fin:
@@ -61,24 +61,35 @@ def capture(etiquette, duree, port, commentaire):
         *completes, tampon = tampon.split(b"\n")
         for brute in completes:
             ligne = brute.decode(errors="replace").strip()
-            if ligne.startswith("# erreur I2C"):
-                erreurs += 1
-            elif ligne and ligne[0].isdigit():
+            if ligne and ligne[0].isdigit():
                 lignes.append(ligne)
     os.close(fd)
 
     with open(chemin, "w") as f:
         f.write(f"# {commentaire}. {duree:g} s, {time.strftime('%Y-%m-%d %H:%M')}\n")
-        f.write(f"# erreurs I2C : {erreurs}\n")
         f.write("timestamp_ms," + ",".join(ENTETE) + "\n")
         f.write("\n".join(lignes) + "\n")
 
     donnees = lire_csv(chemin)
     duree_reelle = (donnees["t"][-1] - donnees["t"][0]) / 1000 if len(donnees["t"]) > 1 else 0
-    print(f"{len(lignes)} échantillons, {len(lignes) / max(duree_reelle, 1e-9):.1f} Hz, erreurs I2C : {erreurs}")
+    print(f"{len(lignes)} échantillons, {len(lignes) / max(duree_reelle, 1e-9):.1f} Hz")
     for axe in AXES:
         print(f"  {axe:6s} moyenne {statistics.fmean(donnees[axe]):+.5f} g   "
               f"écart-type {statistics.stdev(donnees[axe]) * 1000:.3f} mg")
+    ajouter_resume(chemin)
+
+
+def ajouter_resume(chemin):
+    # Écrit moyenne et écart-type de chaque axe en tête du fichier (lignes "#"), une seule fois
+    with open(chemin) as f:
+        lignes = f.read().split("\n")
+    if any(l.startswith("# moyenne") for l in lignes):
+        return
+    donnees = lire_csv(chemin)
+    resume = [f"# moyenne {axe} {statistics.fmean(donnees[axe]):+.5f} g, "
+              f"ecart-type {statistics.stdev(donnees[axe]) * 1000:.3f} mg" for axe in AXES]
+    with open(chemin, "w") as f:
+        f.write("\n".join(lignes[:1] + resume + lignes[1:]))
 
 
 def lire_csv(chemin):
