@@ -11,6 +11,10 @@
 #define SERVEUR_PORT       80
 #define SERVEUR_CHEMIN     "/cpas/reception.php"
 
+// Colonnes du CSV a envoyer, separees par des virgules, sans espace (dans l'ordre du CSV).
+// Colonnes disponibles : timestamp_ms,ax_g,ay_g,az_g,mag_g,gx_dps,gy_dps,gz_dps
+#define COLONNES           "timestamp_ms,ax_g,ay_g,az_g,mag_g,gx_dps,gy_dps,gz_dps"
+
 #define LIGNES_PAR_PAQUET  50                      // mesures envoyees par requete POST
 
 #endif

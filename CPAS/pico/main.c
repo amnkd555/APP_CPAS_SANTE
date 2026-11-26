@@ -16,7 +16,7 @@ int main(void)
     cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_MOT_DE_PASSE, CYW43_AUTH_WPA2_AES_PSK, 30000);
     printf("Wi-Fi connecte\n");
 
-    envoyer_csv();
+    envoyer_csv("reference_mesures_sedentarite.csv");   // un fichier de pico/donnees/
     printf("Envoi termine\n");
 
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);      // allume la LED
